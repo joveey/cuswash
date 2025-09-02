@@ -1,12 +1,8 @@
-"use client";
-import { SessionProvider } from "next-auth/react";
-import { Toaster } from "react-hot-toast";
+    "use client";
 
-export default function Providers({ children }: { children: React.ReactNode }) {
-  return (
-    <SessionProvider>
-      <Toaster position="top-center" />
-      {children}
-    </SessionProvider>
-  );
-}
+    import { SessionProvider } from "next-auth/react";
+
+    export default function Providers({ children }: { children: React.ReactNode }) {
+      return <SessionProvider>{children}</SessionProvider>;
+    }
+    
