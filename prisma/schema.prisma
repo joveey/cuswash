@@ -19,10 +19,11 @@ enum UserRole {
 }
 
 enum BookingStatus {
-  PENDING
-  CONFIRMED
-  CANCELLED
-  COMPLETED
+  PENDING // Menunggu pembayaran
+  PAID // Pembayaran berhasil, menunggu konfirmasi admin
+  CONFIRMED // Pesanan dikonfirmasi oleh admin
+  CANCELLED // Dibatalkan
+  COMPLETED // Selesai
 }
 
 model User {

@@ -16,7 +16,20 @@ export async function PATCH(
     }
 
     try {
-        const booking = await prisma.booking.update({
+        const bookingToConfirm = await prisma.booking.findUnique({
+            where: { id: params.id },
+        });
+
+        if (!bookingToConfirm) {
+            return NextResponse.json({ error: "Booking not found" }, { status: 404 });
+        }
+        
+        // Ensure we only confirm bookings that are already paid
+        if (bookingToConfirm.status !== 'PAID') {
+            return NextResponse.json({ error: `Booking cannot be confirmed. Current status: ${bookingToConfirm.status}` }, { status: 400 });
+        }
+
+        const updatedBooking = await prisma.booking.update({
             where: { id: params.id },
             data: { status: 'CONFIRMED' },
             include: {
@@ -25,26 +38,24 @@ export async function PATCH(
             },
         });
 
-        if (!booking) {
-            return NextResponse.json({ error: "Booking not found" }, { status: 404 });
-        }
 
-        if (!booking.user.email) {
-            return NextResponse.json({ error: "User email not found" }, { status: 400 });
+        if (!updatedBooking.user.email) {
+            console.warn(`Booking ${updatedBooking.id} confirmed, but user has no email address.`);
+            return NextResponse.json(updatedBooking);
         }
 
         // Generate HTML email content
-        const emailHtml = generateInvoiceEmailHtml(booking);
+        const emailHtml = generateInvoiceEmailHtml(updatedBooking);
 
         // Send email notification
         await resend.emails.send({
-            from: process.env.EMAIL_FROM || 'CusWash <noreply@cuswash.com>',
-            to: booking.user.email,
-            subject: `🚗 Booking Confirmed - Invoice #${booking.id.substring(0, 8)}`,
+            from: process.env.EMAIL_FROM || 'CusWash <noreply@yourdomain.com>',
+            to: updatedBooking.user.email,
+            subject: `🚗 Booking Confirmed - Invoice #${updatedBooking.id.substring(0, 8)}`,
             html: emailHtml,
         });
 
-        return NextResponse.json(booking);
+        return NextResponse.json(updatedBooking);
 
     } catch (error) {
         console.error("Confirmation failed:", error);
@@ -54,3 +65,4 @@ export async function PATCH(
         }, { status: 500 });
     }
 }
+

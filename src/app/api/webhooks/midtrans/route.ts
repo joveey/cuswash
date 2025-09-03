@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import midtransClient from 'midtrans-client';
 import prisma from '@/lib/prisma';
 import crypto from 'crypto';
+import { BookingStatus } from '@prisma/client';
 
 // Initialize Midtrans Core API
 const coreApi = new midtransClient.CoreApi({
@@ -28,26 +29,45 @@ export async function POST(req: Request) {
     // Process notification
     const { order_id, transaction_status, fraud_status } = notificationJson;
 
-    let newPaymentStatus = transaction_status;
+    const booking = await prisma.booking.findUnique({
+        where: { midtransOrderId: order_id },
+    });
+
+    if (!booking) {
+        return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
+    }
     
-    if (transaction_status === 'capture') {
+    // Determine the new status based on the notification
+    let paymentStatusUpdate = booking.paymentStatus;
+    let bookingStatusUpdate: BookingStatus = booking.status;
+
+    if (transaction_status === 'capture' || transaction_status === 'settlement') {
       if (fraud_status === 'accept') {
-        newPaymentStatus = 'success';
+        paymentStatusUpdate = 'success';
+        // Only update status to PAID if it's currently PENDING
+        if (booking.status === 'PENDING') {
+            bookingStatusUpdate = 'PAID';
+        }
       }
-    } else if (transaction_status === 'settlement') {
-      newPaymentStatus = 'success';
     } else if (
       transaction_status === 'cancel' ||
       transaction_status === 'deny' ||
       transaction_status === 'expire'
     ) {
-      newPaymentStatus = 'failed';
+      paymentStatusUpdate = 'failed';
+       if (booking.status === 'PENDING' || booking.status === 'PAID') {
+           bookingStatusUpdate = 'CANCELLED';
+       }
+    } else {
+      paymentStatusUpdate = transaction_status;
     }
 
+    // Update the booking in the database
     await prisma.booking.update({
       where: { midtransOrderId: order_id },
       data: {
-        paymentStatus: newPaymentStatus,
+        paymentStatus: paymentStatusUpdate,
+        status: bookingStatusUpdate,
       },
     });
 
@@ -57,3 +77,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
