@@ -12,23 +12,11 @@ import Link from "next/link";
 
 type AvailableTimeSlot = TimeSlot & { isAvailable: boolean };
 
-// Define a specific type for Midtrans results to avoid using 'any'
-interface MidtransTransactionResult {
-  status_code: string;
-  status_message: string;
-  transaction_id: string;
-  order_id: string;
-  gross_amount: string;
-  payment_type: string;
-  transaction_time: string;
-  transaction_status: string;
-}
-
-// Declare window.snap so TypeScript doesn't throw an error
+// Deklarasikan window.snap agar TypeScript tidak error
 declare global {
     interface Window {
         snap: {
-            pay: (token: string, options: Record<string, unknown>) => void;
+            pay: (token: string, options: Record<string, () => void>) => void;
         };
     }
 }
@@ -49,10 +37,9 @@ function BookingForm() {
   const [slotsLoading, setSlotsLoading] = useState(true);
 
   // Check if the user has a phone number from the session
-  // @ts-expect-error -- Properti phoneNumber ditambahkan secara custom ke tipe User session
-  const userHasPhoneNumber = !!session?.user?.phoneNumber;
+  const userHasPhoneNumber = !!(session?.user as { phoneNumber?: string })?.phoneNumber;
 
-  // Load Midtrans Snap script when the component mounts
+  // Load script Midtrans Snap saat komponen dimuat
   useEffect(() => {
     const script = document.createElement("script");
     script.src = "https://app.sandbox.midtrans.com/snap/snap.js";
@@ -113,6 +100,7 @@ function BookingForm() {
       toast.error("Please select a service, date, and time slot.");
       return;
     }
+    // Final check for phone number before submitting
     if (!userHasPhoneNumber) {
         toast.error("Please add your phone number in your profile to book.");
         return;
@@ -142,18 +130,15 @@ function BookingForm() {
 
       if (data.token) {
         window.snap.pay(data.token, {
-            onSuccess: function (result: MidtransTransactionResult) {
-                console.log("Payment Success:", result);
+            onSuccess: function () {
                 toast.success("Payment successful!");
                 router.push("/my-bookings");
             },
-            onPending: function (result: MidtransTransactionResult) {
-                console.log("Payment Pending:", result);
+            onPending: function () {
                 toast("Waiting for your payment.");
                 router.push("/my-bookings");
             },
-            onError: function (result: MidtransTransactionResult) {
-                console.error("Payment Error:", result);
+            onError: function () {
                 toast.error("Payment failed.");
             },
             onClose: function () {
@@ -162,16 +147,16 @@ function BookingForm() {
         });
       }
 
-    } catch (error) {
+  } catch (error) {
         toast.dismiss(toastId);
         if (error instanceof Error) {
           toast.error(error.message);
         } else {
           toast.error("An unexpected error occurred.");
         }
-    } finally {
+      } finally {
         setLoading(false);
-    }
+      }
   };
 
   const selectedCarType = useMemo(() => carTypes.find(ct => ct.id === selectedCarTypeId), [carTypes, selectedCarTypeId]);
@@ -185,6 +170,7 @@ function BookingForm() {
       <div className="w-full max-w-4xl p-8 my-8 space-y-6 bg-white rounded-lg shadow-xl">
         <h1 className="text-3xl font-bold text-center text-gray-800">Book Your Car Wash</h1>
         
+        {/* Warning message if phone number is missing */}
         {!userHasPhoneNumber && sessionStatus === 'authenticated' && (
             <div className="p-4 text-sm text-yellow-800 rounded-lg bg-yellow-50 border border-yellow-200 flex items-start">
                 <Info className="h-5 w-5 mr-3 mt-0.5 flex-shrink-0" />
@@ -198,7 +184,7 @@ function BookingForm() {
         )}
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Left Column: Service & Calendar */}
+          {/* Kolom Kiri: Pilihan Layanan & Kalender */}
           <div className="space-y-6">
             <div>
               <label htmlFor="carType" className="block text-sm font-medium text-gray-700">1. Select Your Service</label>
@@ -225,13 +211,13 @@ function BookingForm() {
                      }
                  }}
                  minDate={new Date()}
-                 inline
+                 inline // Tampilkan kalender langsung
                  className="w-full"
                />
             </div>
           </div>
 
-          {/* Right Column: Time Slots & Submit */}
+          {/* Kolom Kanan: Pilihan Slot Waktu & Tombol Submit */}
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700">3. Select an Available Time Slot</label>
@@ -291,6 +277,7 @@ function BookingForm() {
   );
 }
 
+// Bungkus komponen dengan Suspense untuk menangani `useSearchParams`
 export default function BookPage() {
     return (
         <Suspense fallback={<div className="text-center p-12">Loading...</div>}>
