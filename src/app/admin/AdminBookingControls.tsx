@@ -6,8 +6,8 @@ import { BookingStatus } from '@prisma/client';
 import { formatRupiah } from '@/lib/utils';
 import { BookingForAdmin } from './page';
 import { motion } from 'framer-motion';
-// FIX: Tambahkan DollarSign dan CheckCircle ke dalam import
-import { Check, X, Hourglass, Car, Calendar, Clock, DollarSign, CheckCircle } from 'lucide-react';
+// FIX: Tambahkan Phone ke dalam import
+import { Check, X, Hourglass, Car, Calendar, Clock, DollarSign, CheckCircle, Phone } from 'lucide-react';
 
 interface AdminBookingControlsProps {
     initialBookings: BookingForAdmin[];
@@ -23,7 +23,6 @@ const getStatusChip = (status: BookingStatus) => {
         CANCELLED: 'bg-red-100 text-red-800',
     };
     
-    // Gunakan ikon yang sudah kita impor
     const Icon = {
         PENDING: Hourglass,
         PAID: DollarSign,
@@ -87,6 +86,11 @@ export default function AdminBookingControls({ initialBookings, setBookings }: A
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="text-sm font-medium text-gray-900">{booking.user.name || 'N/A'}</div>
                                     <div className="text-sm text-gray-500">{booking.user.email}</div>
+                                    {/* ADD: Tampilkan nomor telepon di sini */}
+                                    <div className="text-sm text-gray-500 mt-1 flex items-center">
+                                        <Phone className="h-3 w-3 mr-1.5 text-gray-400" />
+                                        {booking.user.phoneNumber || 'No phone'}
+                                    </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="text-sm text-gray-900 flex items-center"><Car className="h-4 w-4 mr-2 text-gray-400"/>{booking.carType.name}</div>
@@ -127,4 +131,3 @@ export default function AdminBookingControls({ initialBookings, setBookings }: A
         </div>
     );
 }
-

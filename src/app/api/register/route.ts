@@ -4,10 +4,11 @@ import bcryptjs from "bcryptjs";
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, password } = await req.json();
+    // MODIFY: Destructure phoneNumber from the request body
+    const { name, email, password, phoneNumber } = await req.json();
 
-    // Validasi input
-    if (!name || !email || !password) {
+    // MODIFY: Add phoneNumber to the validation check
+    if (!name || !email || !password || !phoneNumber) {
       return NextResponse.json(
         { error: "All fields are required" },
         { status: 400 }
@@ -35,6 +36,7 @@ export async function POST(req: NextRequest) {
         name,
         email,
         password: hashedPassword,
+        phoneNumber, // ADD: Save the phoneNumber to the database
       },
     });
 
@@ -53,4 +55,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-

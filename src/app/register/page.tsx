@@ -12,6 +12,7 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState(""); // ADD: State for phone number
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -25,7 +26,8 @@ export default function RegisterPage() {
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        // MODIFY: Add phoneNumber to the request body
+        body: JSON.stringify({ name, email, password, phoneNumber }),
       });
 
       if (res.ok) {
@@ -64,12 +66,25 @@ export default function RegisterPage() {
                 placeholder="Jovi"
               />
             </div>
-             <div className="space-y-2">
+            <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">Email</label>
               <input
                 id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="you@example.com"
+              />
+            </div>
+            {/* ADD: Phone Number Input Field */}
+            <div className="space-y-2">
+              <label htmlFor="phoneNumber" className="text-sm font-medium">Phone Number</label>
+              <input
+                id="phoneNumber"
+                type="tel"
+                required
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="08123456789"
               />
             </div>
             <div className="space-y-2">

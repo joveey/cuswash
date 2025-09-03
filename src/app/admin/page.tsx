@@ -4,10 +4,10 @@ import { redirect } from 'next/navigation';
 import { Prisma } from '@prisma/client';
 import AdminDashboardClient from './AdminDashboardClient';
 
-// Tipe data yang lebih spesifik untuk booking yang akan diteruskan
+// MODIFY: Perbarui tipe data untuk menyertakan phoneNumber
 export type BookingForAdmin = Prisma.BookingGetPayload<{
     include: { 
-        user: { select: { name: true, email: true } }, 
+        user: { select: { name: true, email: true, phoneNumber: true } }, // ADD: phoneNumber
         carType: { select: { name: true } },
         timeSlot: { select: { time: true }}
     }
@@ -20,9 +20,10 @@ export default async function AdminPage() {
         redirect('/');
     }
 
+    // MODIFY: Perbarui query Prisma untuk mengambil phoneNumber
     const allBookings: BookingForAdmin[] = await prisma.booking.findMany({
         include: { 
-            user: { select: { name: true, email: true } }, 
+            user: { select: { name: true, email: true, phoneNumber: true } }, // ADD: phoneNumber
             carType: { select: { name: true } },
             timeSlot: { select: { time: true }}
         },

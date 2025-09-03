@@ -3,7 +3,7 @@ import { DefaultSession, DefaultUser } from "next-auth";
 import { JWT } from "next-auth/jwt";
 
 // Kita "memperluas" tipe data bawaan dari NextAuth
-// untuk menyertakan properti kustom kita (id dan role)
+// untuk menyertakan properti kustom kita (id, role, dan phoneNumber)
 
 declare module "next-auth" {
   /**
@@ -15,6 +15,7 @@ declare module "next-auth" {
       /** Properti kustom yang kita tambahkan. */
       id: string;
       role: UserRole;
+      phoneNumber?: string | null; // ADD: Menambahkan tipe untuk nomor telepon
     } & DefaultSession["user"]; // & DefaultSession["user"] untuk mewarisi properti default (name, email, image)
   }
 
@@ -31,5 +32,6 @@ declare module "next-auth/jwt" {
   interface JWT {
     id: string;
     role: UserRole;
+    phoneNumber?: string | null; // ADD: Menambahkan tipe untuk nomor telepon
   }
 }
