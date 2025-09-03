@@ -26,6 +26,24 @@ enum BookingStatus {
   COMPLETED // Selesai
 }
 
+// Model baru untuk jam operasional
+model OperatingHour {
+  id        Int      @id @default(autoincrement())
+  dayOfWeek Int      // 0=Minggu, 1=Senin, ..., 6=Sabtu
+  openTime  String   // e.g., "08:00"
+  closeTime String   // e.g., "17:00"
+  isActive  Boolean  @default(true)
+}
+
+// Model baru untuk slot waktu
+model TimeSlot {
+  id           String    @id @default(cuid())
+  time         String    // e.g., "08:00", "09:00"
+  capacity     Int       @default(2) // Berapa mobil yang bisa dilayani di slot ini
+  bookings     Booking[]
+}
+
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -87,15 +105,20 @@ model Booking {
   userId          String
   carType         CarType       @relation(fields: [carTypeId], references: [id])
   carTypeId       String
-  bookingDate     DateTime
+  
+  // Perubahan: Menggunakan relasi ke TimeSlot
+  bookingDate     DateTime      // Tanggal pesanan
+  timeSlot        TimeSlot      @relation(fields: [timeSlotId], references: [id])
+  timeSlotId      String
+  
   status          BookingStatus @default(PENDING)
   totalPrice      Float
   
-  // Midtrans related fields
   midtransOrderId String?       @unique
   midtransToken   String?       @db.Text
-  paymentStatus   String?       // To store status from Midtrans webhook
+  paymentStatus   String?       
 
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 }
+
