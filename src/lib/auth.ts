@@ -47,7 +47,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token && session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as UserRole;
-        // @ts-ignore - This custom property will be added via types/next-auth.d.ts
+        // @ts-expect-error
         session.user.phoneNumber = token.phoneNumber as string; // ADD: Pass phoneNumber to session
       }
       return session;
