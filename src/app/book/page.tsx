@@ -14,9 +14,9 @@ type AvailableTimeSlot = TimeSlot & { isAvailable: boolean };
 
 // Deklarasikan window.snap agar TypeScript tidak error
 declare global {
-    interface Window {
-        snap: any;
-    }
+    snap: {
+        pay: (token: string, options: Record<string, unknown>) => void;
+    };
 }
 
 function BookingForm() {
@@ -35,8 +35,8 @@ function BookingForm() {
   const [slotsLoading, setSlotsLoading] = useState(true);
 
   // ADD: Check if the user has a phone number from the session
-  // @ts-ignore
-  const userHasPhoneNumber = !!session?.user?.phoneNumber;
+  // @ts-expect-error
+const userHasPhoneNumber = !!session?.user?.phoneNumber;
 
   // Load script Midtrans Snap saat komponen dimuat
   useEffect(() => {
@@ -129,15 +129,15 @@ function BookingForm() {
 
       if (data.token) {
         window.snap.pay(data.token, {
-            onSuccess: function (result: any) {
+            onSuccess: function (result: Record<string, any>) {
                 toast.success("Payment successful!");
                 router.push("/my-bookings");
             },
-            onPending: function (result: any) {
+            onPending: function (result: Record<string, any>) {
                 toast("Waiting for your payment.");
                 router.push("/my-bookings");
             },
-            onError: function (result: any) {
+            onError: function (result: Record<string, any>) {
                 toast.error("Payment failed.");
             },
             onClose: function () {
@@ -146,12 +146,18 @@ function BookingForm() {
         });
       }
 
-    } catch (error: any) {
-      toast.dismiss(toastId);
-      toast.error(error.message);
-    } finally {
-      setLoading(false);
-    }
+  } catch (error) { // 1. Hapus (error: any)
+        toast.dismiss(toastId);
+        // 2. Tambahkan pengecekan apakah error adalah instance dari Error
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          // Fallback jika yang di-throw bukan objek Error
+          toast.error("An unexpected error occurred.");
+        }
+      } finally {
+        setLoading(false);
+      }
   };
 
   const selectedCarType = useMemo(() => carTypes.find(ct => ct.id === selectedCarTypeId), [carTypes, selectedCarTypeId]);

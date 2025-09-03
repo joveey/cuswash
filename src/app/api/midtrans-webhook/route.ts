@@ -3,8 +3,8 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 // Fungsi untuk memverifikasi signature dari Midtrans
-async function verifySignature(notificationPayload: any): Promise<boolean> {
-  const serverKey = process.env.MIDTRANS_SERVER_KEY;
+async function verifySignature(notificationPayload: Record<string, any>): Promise<boolean> {
+    const serverKey = process.env.MIDTRANS_SERVER_KEY;
   if (!serverKey) {
     console.error("MIDTRANS_SERVER_KEY is not set");
     return false;

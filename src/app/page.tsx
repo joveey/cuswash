@@ -77,7 +77,7 @@ const TestimonialCard = ({ quote, author, index }: { quote: string, author: stri
         className="bg-gray-800 p-8 rounded-xl text-white border border-gray-700"
     >
         <MessageSquare className="h-8 w-8 text-blue-400 mb-4" />
-        <p className="text-gray-300 italic mb-6">"{quote}"</p>
+        <p className="text-gray-300 italic mb-6">&quot;{quote}&quot;</p>
         <p className="font-semibold text-white">- {author}</p>
     </motion.div>
 );
