@@ -18,8 +18,9 @@ export default function Navbar() {
             <div className="h-8 w-24 bg-gray-200 rounded animate-pulse"></div>
           ) : session?.user ? (
             <>
-              <span className="text-gray-700">Hi, {session.user.name}</span>
-              <Link href="/dashboard" className="text-gray-700 hover:text-blue-600">
+              <span className="text-gray-700 hidden sm:inline">Hi, {session.user.name?.split(' ')[0]}</span>
+              {/* Updated link from /dashboard to /my-bookings */}
+              <Link href="/my-bookings" className="text-gray-700 hover:text-blue-600">
                 My Bookings
               </Link>
               <button
