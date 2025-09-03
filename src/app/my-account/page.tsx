@@ -20,7 +20,7 @@ export default function MyAccountPage() {
     useEffect(() => {
         if (session?.user) {
             setName(session.user.name || "");
-            // @ts-expect-error
+            // @ts-expect-error -- phone number is a custom property
             setPhoneNumber(session.user.phoneNumber || "");
         }
     }, [session]);

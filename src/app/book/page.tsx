@@ -14,9 +14,11 @@ type AvailableTimeSlot = TimeSlot & { isAvailable: boolean };
 
 // Deklarasikan window.snap agar TypeScript tidak error
 declare global {
-    snap: {
-        pay: (token: string, options: Record<string, unknown>) => void;
-    };
+    interface Window {
+        snap: {
+            pay: (token: string, options: Record<string, unknown>) => void;
+        };
+    }
 }
 
 function BookingForm() {

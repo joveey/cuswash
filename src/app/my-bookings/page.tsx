@@ -97,7 +97,7 @@ export default function MyBookingsPage() {
                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20 bg-white rounded-lg shadow-sm">
                     <Info className="mx-auto h-12 w-12 text-gray-400" />
                     <h3 className="mt-2 text-lg font-medium text-gray-900">No bookings yet</h3>
-                    <p className="mt-1 text-sm text-gray-500">You haven&apos;t made any bookings. Let's change that!</p>
+                    <p className="mt-1 text-sm text-gray-500">You haven&apos;t made any bookings. Let&apos;s change that!</p>
                     <div className="mt-6">
                         <Link href="/book" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
                             Book a Car Wash
