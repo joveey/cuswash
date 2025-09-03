@@ -1,5 +1,3 @@
-// src/app/api/bookings/[id]/status/route.ts
-
 import { NextResponse, NextRequest } from 'next/server';
 import { auth } from '@/lib/auth';
 import prisma from '@/lib/prisma';
