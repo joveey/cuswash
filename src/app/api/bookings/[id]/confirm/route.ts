@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { Resend } from "resend";
@@ -7,17 +7,19 @@ import { generateInvoiceEmailHtml } from "@/components/emails/InvoiceEmail";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: { id: string } }
 ) {
     const session = await auth();
     if (session?.user?.role !== 'ADMIN') {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
+    
+    const { id } = context.params;
 
     try {
         const bookingToConfirm = await prisma.booking.findUnique({
-            where: { id: params.id },
+            where: { id: id },
         });
 
         if (!bookingToConfirm) {
@@ -30,7 +32,7 @@ export async function PATCH(
         }
 
         const updatedBooking = await prisma.booking.update({
-            where: { id: params.id },
+            where: { id: id },
             data: { status: 'CONFIRMED' },
             include: {
                 user: true,
@@ -65,4 +67,3 @@ export async function PATCH(
         }, { status: 500 });
     }
 }
-
