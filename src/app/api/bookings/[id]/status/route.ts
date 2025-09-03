@@ -1,11 +1,11 @@
-import { NextResponse, NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { BookingStatus } from '@prisma/client';
 
 export async function PATCH(
-  req: NextRequest,
-  context: { params: { id: string } }
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
     const session = await auth();
     // 1. Pastikan hanya admin yang bisa mengakses
@@ -13,9 +13,9 @@ export async function PATCH(
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const { id } = context.params;
-
     try {
+        const { id } = await params;
+        
         const { status } = await req.json();
 
         // 2. Validasi input status
@@ -24,7 +24,7 @@ export async function PATCH(
         }
         
         const booking = await prisma.booking.findUnique({
-            where: { id: id },
+            where: { id },
         });
 
         if (!booking) {
@@ -33,7 +33,7 @@ export async function PATCH(
 
         // 3. Update status booking di database
         const updatedBooking = await prisma.booking.update({
-            where: { id: id },
+            where: { id },
             data: { status: status as BookingStatus },
         });
 

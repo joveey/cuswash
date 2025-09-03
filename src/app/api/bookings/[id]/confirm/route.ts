@@ -1,4 +1,4 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { Resend } from "resend";
@@ -7,19 +7,19 @@ import { generateInvoiceEmailHtml } from "@/components/emails/InvoiceEmail";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
     const session = await auth();
     if (session?.user?.role !== 'ADMIN') {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
-    
-    const { id } = params;
 
     try {
+        const { id } = await params;
+        
         const bookingToConfirm = await prisma.booking.findUnique({
-            where: { id: id },
+            where: { id },
         });
 
         if (!bookingToConfirm) {
@@ -32,13 +32,14 @@ export async function PATCH(
         }
 
         const updatedBooking = await prisma.booking.update({
-            where: { id: id },
+            where: { id },
             data: { status: 'CONFIRMED' },
             include: {
                 user: true,
                 carType: true,
             },
         });
+
 
         if (!updatedBooking.user.email) {
             console.warn(`Booking ${updatedBooking.id} confirmed, but user has no email address.`);
