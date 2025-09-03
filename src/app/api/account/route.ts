@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import bcryptjs from 'bcryptjs';
+import { Prisma } from '@prisma/client'; // ADD: Import Prisma
 
 export async function PATCH(req: Request) {
     const session = await auth();
@@ -54,6 +55,16 @@ export async function PATCH(req: Request) {
 
     } catch (error) {
         console.error("Account update error:", error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+
+        // MODIFY: Cek error spesifik dari Prisma
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            // P2002 adalah kode error untuk pelanggaran "unique constraint"
+            if (error.code === 'P2002') {
+                return NextResponse.json({ error: 'Nomor telepon ini sudah digunakan oleh akun lain.' }, { status: 409 }); // 409 Conflict
+            }
+        }
+
+        // Untuk semua error lainnya
+        return NextResponse.json({ error: 'Terjadi kesalahan pada server.' }, { status: 500 });
     }
 }
