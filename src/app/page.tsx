@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Car, Sparkles, ShieldCheck, Clock, CheckCircle, Award, MessageSquare } from "lucide-react";
+import { Car, Sparkles, ShieldCheck, Clock, Award, MessageSquare, MapPin } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 import { formatRupiah } from "@/lib/utils";
@@ -19,7 +19,7 @@ const ServiceCard = ({ carType, index }: { carType: CarType, index: number }) =>
     initial={{ opacity: 0, y: 50 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.5, delay: index * 0.1 }}
-    className="bg-white rounded-xl shadow-md overflow-hidden transform hover:-translate-y-2 transition-transform duration-300 group border border-gray-100 hover:shadow-blue-200 hover:border-blue-400"
+    className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:-translate-y-2 transition-transform duration-300 group border border-gray-100 hover:shadow-blue-200 hover:border-blue-400"
   >
     <div className="p-8">
       <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-6 group-hover:bg-blue-600 transition-colors duration-300">
@@ -204,6 +204,47 @@ export default function HomePage() {
             </div>
         </div>
       </section>
+      
+      {/* Location Section - UPDATED WITH MAP */}
+      <section className="bg-white py-24">
+        <div className="container mx-auto px-6">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 className="text-3xl font-bold text-gray-800 tracking-tight">Kunjungi Lokasi Kami</h2>
+                    <p className="mt-4 text-gray-600 leading-relaxed">
+                        Kami siap menyambut Anda di workshop kami. Nikmati fasilitas ruang tunggu yang nyaman selagi mobil Anda kami rawat.
+                    </p>
+                    <div className="mt-8 space-y-4">
+                        <div className="flex items-start">
+                            <MapPin className="h-6 w-6 text-blue-600 mt-1 flex-shrink-0" />
+                            <div className="ml-4">
+                                <h4 className="font-semibold text-gray-800">Alamat Workshop</h4>
+                                <p className="text-gray-600">Jl. Pangeran Antasari No. 36, Cilandak, Jakarta Selatan, 12430</p>
+                            </div>
+                        </div>
+                        <div className="flex items-start">
+                            <Clock className="h-6 w-6 text-blue-600 mt-1 flex-shrink-0" />
+                            <div className="ml-4">
+                                <h4 className="font-semibold text-gray-800">Jam Operasional</h4>
+                                <p className="text-gray-600">Senin - Minggu: 08:00 - 21:00 WIB</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="rounded-xl overflow-hidden shadow-2xl h-96">
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.011922851457!2d106.7997327759109!3d-6.262176961314605!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f1a87a26f327%3A0x267323543505c846!2sJl.%20Pangeran%20Antasari%20No.36%2C%20RT.12%2FRW.13%2C%20Cilandak%20Bar.%2C%20Kec.%20Cilandak%2C%20Kota%20Jakarta%20Selatan%2C%20Daerah%20Khusus%20Ibukota%20Jakarta%2012430!5e0!3m2!1sen!2sid!4v1725364273180!5m2!1sen!2sid"
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0 }}
+                        allowFullScreen={true}
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                    ></iframe>
+                </div>
+            </div>
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="bg-gray-800 text-white py-10 border-t-4 border-blue-600">
@@ -215,3 +256,4 @@ export default function HomePage() {
     </div>
   );
 }
+
