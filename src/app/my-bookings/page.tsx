@@ -1,111 +1,145 @@
-import { auth } from "@/lib/auth";
-import prisma from "@/lib/prisma";
-import { redirect } from "next/navigation";
-import Link from "next/link";
-import { formatRupiah } from "@/lib/utils";
+"use client";
 
-export default async function MyBookingsPage() {
-  const session = await auth();
-  if (!session?.user) {
-    redirect("/api/auth/signin?callbackUrl=/my-bookings");
-  }
+import { useSession } from 'next-auth/react';
+import { useState, useEffect } from 'react';
+import { Prisma } from '@prisma/client';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { Calendar, Clock, Loader2, Tag, Info } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { formatRupiah } from '@/lib/utils';
 
-  const bookings = await prisma.booking.findMany({
-    where: { userId: session.user.id },
-    include: {
-      carType: true,
-    },
-    orderBy: {
-      bookingDate: "desc",
-    },
-  });
+type BookingWithRelations = Prisma.BookingGetPayload<{
+    include: { carType: true, timeSlot: true }
+}>;
 
-  const getStatusChip = (status: string, paymentStatus: string | null) => {
-    let bgColor = "bg-gray-200";
-    let textColor = "text-gray-800";
-    let text = status;
+const BookingStatusBadge = ({ status }: { status: string }) => {
+    const statusStyles: { [key: string]: string } = {
+        PENDING: 'bg-yellow-100 text-yellow-800',
+        PAID: 'bg-blue-100 text-blue-800',
+        CONFIRMED: 'bg-green-100 text-green-800',
+        COMPLETED: 'bg-purple-100 text-purple-800',
+        CANCELLED: 'bg-red-100 text-red-800',
+    };
+    return (
+        <span className={`px-2 py-1 text-xs font-medium rounded-full ${statusStyles[status] || 'bg-gray-100 text-gray-800'}`}>
+            {status}
+        </span>
+    );
+};
 
-    if (status === "PENDING" && paymentStatus !== "success") {
-      bgColor = "bg-yellow-200";
-      textColor = "text-yellow-800";
-      text = "Menunggu Pembayaran";
-    } else if (status === "PAID") {
-      bgColor = "bg-blue-200";
-      textColor = "text-blue-800";
-      text = "Sudah Dibayar";
-    } else if (status === "CONFIRMED") {
-      bgColor = "bg-green-200";
-      textColor = "text-green-800";
-      text = "Terkonfirmasi";
-    } else if (status === "CANCELLED") {
-      bgColor = "bg-red-200";
-      textColor = "text-red-800";
-      text = "Dibatalkan";
+export default function MyBookingsPage() {
+    const { data: session, status } = useSession();
+    const [bookings, setBookings] = useState<BookingWithRelations[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        if (status === 'authenticated') {
+            // Kita fetch data dari API route yang sudah kita buat
+            fetch('/api/my-bookings')
+                .then(res => res.json())
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        setBookings(data);
+                    }
+                    setIsLoading(false);
+                })
+                .catch(err => {
+                    console.error("Failed to fetch bookings:", err);
+                    setIsLoading(false);
+                });
+        }
+        if (status === 'unauthenticated') {
+             setIsLoading(false);
+        }
+    }, [status]);
+    
+    // Konfigurasi animasi untuk container
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1
+            }
+        }
+    };
+    
+    // Konfigurasi animasi untuk setiap item booking
+    const itemVariants = {
+        hidden: { y: 20, opacity: 0 },
+        visible: {
+            y: 0,
+            opacity: 1,
+            transition: {
+                type: 'spring',
+                stiffness: 100
+            }
+        }
+    };
+
+    if (isLoading || status === 'loading') {
+        return (
+            <div className="flex justify-center items-center h-[calc(100vh-56px)]">
+                <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+            </div>
+        );
     }
 
     return (
-      <span
-        className={`px-3 py-1 text-sm font-semibold rounded-full ${bgColor} ${textColor}`}
-      >
-        {text}
-      </span>
-    );
-  };
+        <div className="container mx-auto px-4 py-8">
+             <header className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-900">My Bookings</h1>
+                <p className="text-gray-600 mt-1">Here is a list of all your past and upcoming appointments.</p>
+            </header>
 
-  return (
-    <div className="container mx-auto p-8">
-      <header className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold">Riwayat Pesanan Saya</h1>
-      </header>
-      <div className="space-y-6">
-        {bookings.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-lg shadow-md">
-            <p className="text-gray-600">Anda belum memiliki pesanan.</p>
-            <Link
-              href="/book"
-              className="mt-4 inline-block px-6 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 transition"
-            >
-              Pesan Sekarang
-            </Link>
-          </div>
-        ) : (
-          bookings.map((booking) => (
-            <div
-              key={booking.id}
-              className="bg-white p-6 rounded-lg shadow-md transition hover:shadow-lg"
-            >
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
-                <div className="mb-4 md:mb-0">
-                  <h2 className="text-xl font-bold text-gray-800">
-                    {booking.carType.name}
-                  </h2>
-                  <p className="text-sm text-gray-500">
-                    ID Pesanan: {booking.id.substring(0, 8)}
-                  </p>
-                  <p className="mt-2 font-semibold text-lg text-blue-600">
-                    {formatRupiah(booking.totalPrice)}
-                  </p>
-                </div>
-                <div className="flex flex-col items-start md:items-end">
-                  <p className="text-gray-700 font-medium">
-                    {new Date(booking.bookingDate).toLocaleString("id-ID", {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
-                  <div className="mt-2">
-                    {getStatusChip(booking.status, booking.paymentStatus)}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
+            {bookings.length === 0 ? (
+                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20 bg-white rounded-lg shadow-sm">
+                    <Info className="mx-auto h-12 w-12 text-gray-400" />
+                    <h3 className="mt-2 text-lg font-medium text-gray-900">No bookings yet</h3>
+                    <p className="mt-1 text-sm text-gray-500">You haven't made any bookings. Let's change that!</p>
+                    <div className="mt-6">
+                        <Link href="/book" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                            Book a Car Wash
+                        </Link>
+                    </div>
+                </motion.div>
+            ) : (
+                <motion.div 
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="space-y-4"
+                >
+                    {bookings.map((booking) => (
+                        <motion.div key={booking.id} variants={itemVariants}>
+                            <Card>
+                                <CardHeader className="flex flex-row items-center justify-between">
+                                    <CardTitle className="text-lg">{booking.carType.name}</CardTitle>
+                                    <BookingStatusBadge status={booking.status} />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-gray-600">
+                                        <div className="flex items-center">
+                                            <Calendar className="h-4 w-4 mr-2 text-gray-400" />
+                                            <span>{new Date(booking.bookingDate).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <Clock className="h-4 w-4 mr-2 text-gray-400" />
+                                            <span>{booking.timeSlot.time}</span>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <Tag className="h-4 w-4 mr-2 text-gray-400" />
+                                            <span className="font-semibold text-gray-800">{formatRupiah(booking.totalPrice)}</span>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+                    ))}
+                </motion.div>
+            )}
+        </div>
+    );
 }
+
