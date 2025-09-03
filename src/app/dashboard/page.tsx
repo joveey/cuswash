@@ -4,35 +4,8 @@ import { auth } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { formatRupiah } from '@/lib/utils';
+import { Card, CardContent } from '@/components/ui/Card';
 import { Calendar, Car, Clock, Star, ArrowRight, PlusCircle, CheckCircle } from 'lucide-react';
-
-// Tipe data yang dibutuhkan untuk halaman ini
-type BookingWithRelations = {
-    id: string;
-    userId: string;
-    carTypeId: string;
-    bookingDate: Date;
-    timeSlotId: string;
-    totalPrice: number;
-    status: string;
-    paymentStatus: string | null;
-    midtransToken: string | null;
-    midtransOrderId: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-    carType: {
-        id: string;
-        name: string;
-        price: number;
-    };
-    timeSlot: {
-        id: string;
-        time: string;
-        capacity: number;
-    };
-};
 
 // Komponen Badge Status
 const BookingStatusBadge = ({ status }: { status: string }) => {
