@@ -7,6 +7,8 @@ import DatePicker from "react-datepicker";
 import toast from "react-hot-toast";
 import { CarType, TimeSlot } from "@prisma/client";
 import { formatRupiah } from "@/lib/utils";
+import { Info } from "lucide-react"; // ADD: Import Info icon
+import Link from "next/link"; // ADD: Import Link
 
 type AvailableTimeSlot = TimeSlot & { isAvailable: boolean };
 
@@ -31,6 +33,10 @@ function BookingForm() {
 
   const [loading, setLoading] = useState(false);
   const [slotsLoading, setSlotsLoading] = useState(true);
+
+  // ADD: Check if the user has a phone number from the session
+  // @ts-ignore
+  const userHasPhoneNumber = !!session?.user?.phoneNumber;
 
   // Load script Midtrans Snap saat komponen dimuat
   useEffect(() => {
@@ -93,6 +99,11 @@ function BookingForm() {
       toast.error("Please select a service, date, and time slot.");
       return;
     }
+    // ADD: Final check for phone number before submitting
+    if (!userHasPhoneNumber) {
+        toast.error("Please add your phone number in your profile to book.");
+        return;
+    }
 
     setLoading(true);
     const toastId = toast.loading("Processing your booking...");
@@ -153,6 +164,20 @@ function BookingForm() {
     <div className="flex justify-center min-h-screen bg-gray-100 p-4">
       <div className="w-full max-w-4xl p-8 my-8 space-y-6 bg-white rounded-lg shadow-xl">
         <h1 className="text-3xl font-bold text-center text-gray-800">Book Your Car Wash</h1>
+        
+        {/* ADD: Warning message if phone number is missing */}
+        {!userHasPhoneNumber && sessionStatus === 'authenticated' && (
+            <div className="p-4 text-sm text-yellow-800 rounded-lg bg-yellow-50 border border-yellow-200 flex items-start">
+                <Info className="h-5 w-5 mr-3 mt-0.5 flex-shrink-0" />
+                <div>
+                    <span className="font-medium">Nomor telepon dibutuhkan!</span> Anda harus menambahkan nomor telepon di profil Anda sebelum dapat membuat pesanan. 
+                    <Link href="/my-account" className="font-semibold underline ml-1 hover:text-yellow-900">
+                        Update Profil Anda di sini.
+                    </Link>
+                </div>
+            </div>
+        )}
+
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Kolom Kiri: Pilihan Layanan & Kalender */}
           <div className="space-y-6">
@@ -235,8 +260,9 @@ function BookingForm() {
 
             <button
               type="submit"
-              disabled={loading || !selectedTimeSlotId}
-              className="w-full px-4 py-3 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400"
+              // MODIFY: Disable button if phone number is missing
+              disabled={loading || !selectedTimeSlotId || !userHasPhoneNumber}
+              className="w-full px-4 py-3 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               {loading ? "Processing..." : "Book and Proceed to Payment"}
             </button>
@@ -255,4 +281,3 @@ export default function BookPage() {
         </Suspense>
     )
 }
-
