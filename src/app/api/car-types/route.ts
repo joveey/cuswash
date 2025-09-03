@@ -5,7 +5,7 @@ export async function GET() {
   try {
     const carTypes = await prisma.carType.findMany();
     return NextResponse.json(carTypes);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Gagal mengambil data jenis mobil" },
       { status: 500 }

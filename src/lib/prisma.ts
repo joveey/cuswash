@@ -2,7 +2,6 @@ import { PrismaClient } from '@prisma/client'
 
 // Deklarasikan tipe untuk prisma di globalThis agar TypeScript tidak error.
 declare global {
-  // eslint-disable-next-line no-var
   var prisma: PrismaClient | undefined
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Car, Sparkles, ShieldCheck, Clock, Award, MessageSquare, MapPin } from "lucide-react";
+import { Car, ShieldCheck, Clock, Award, MessageSquare, MapPin } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 import { formatRupiah } from "@/lib/utils";

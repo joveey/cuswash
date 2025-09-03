@@ -29,7 +29,7 @@ const BookingStatusBadge = ({ status }: { status: string }) => {
 };
 
 export default function MyBookingsPage() {
-    const { data: session, status } = useSession();
+    const { status } = useSession();
     const [bookings, setBookings] = useState<BookingWithRelations[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 

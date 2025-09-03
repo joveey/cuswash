@@ -4,6 +4,7 @@ import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { Car, LogIn, LogOut, LayoutDashboard, Wrench, ChevronDown, UserCircle } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import Image from 'next/image';
 import { motion, AnimatePresence } from "framer-motion";
 
 // Helper untuk mendapatkan inisial dari nama
@@ -54,7 +55,7 @@ export default function Navbar() {
                 className="flex items-center space-x-2 p-1.5 rounded-full hover:bg-gray-100 transition-colors"
               >
                 {session.user.image ? (
-                    <img src={session.user.image} alt="User Avatar" className="h-8 w-8 rounded-full" />
+                    <Image src={session.user.image} alt="User Avatar" width={32} height={32} className="h-8 w-8 rounded-full" />
                 ) : (
                     <div className="h-8 w-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-semibold">
                         {getInitials(session.user.name)}

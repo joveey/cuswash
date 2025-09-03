@@ -4,6 +4,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import Image from 'next/image';
 import { LayoutDashboard, CalendarDays, User, Loader2 } from 'lucide-react';
 
 const getInitials = (name?: string | null) => {
@@ -49,7 +50,7 @@ export default function UserDashboardSidebar() {
         <aside className="hidden h-screen w-64 flex-col border-r border-gray-700 bg-gray-800 p-4 lg:flex">
             <div className="mb-8 flex items-center space-x-3">
                  {session?.user?.image ? (
-                    <img src={session.user.image} alt="User Avatar" className="h-12 w-12 rounded-full" />
+                    <Image src={session.user.image} alt="User Avatar" width={32} height={32} className="h-8 w-8 rounded-full" />
                 ) : (
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-xl font-semibold text-white">
                         {getInitials(session?.user?.name)}
