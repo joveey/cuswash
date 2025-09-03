@@ -4,9 +4,21 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { Prisma } from '@prisma/client';
 
-// Type untuk booking dengan relasi
+// Mendefinisikan tipe yang lebih spesifik sesuai dengan data yang di-select
 type BookingWithDetails = Prisma.BookingGetPayload<{
-    include: { user: true, carType: true }
+    include: { 
+        user: {
+            select: {
+                name: true;
+                email: true;
+            }
+        }, 
+        carType: {
+            select: {
+                name: true;
+            }
+        } 
+    }
 }>;
 
 interface AdminBookingControlsProps {
@@ -14,7 +26,8 @@ interface AdminBookingControlsProps {
 }
 
 export default function AdminBookingControls({ initialBookings }: AdminBookingControlsProps) {
-    const [bookings, setBookings] = useState<BookingWithDetails[]>(initialBookings);
+    // Memberikan fallback array kosong untuk mencegah error 'map' of undefined
+    const [bookings, setBookings] = useState<BookingWithDetails[]>(initialBookings || []);
     const [loadingId, setLoadingId] = useState<string | null>(null);
     
     const handleConfirm = async (bookingId: string) => {
@@ -23,9 +36,6 @@ export default function AdminBookingControls({ initialBookings }: AdminBookingCo
         try {
             const res = await fetch(`/api/bookings/${bookingId}/confirm`, {
                 method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
             });
             
             if (!res.ok) {
@@ -35,7 +45,6 @@ export default function AdminBookingControls({ initialBookings }: AdminBookingCo
 
             const updatedBooking: BookingWithDetails = await res.json();
             
-            // Update state dengan booking yang sudah diupdate
             setBookings(prevBookings => 
                 prevBookings.map(booking => 
                     booking.id === bookingId 
@@ -59,12 +68,14 @@ export default function AdminBookingControls({ initialBookings }: AdminBookingCo
         switch (status) {
             case 'CONFIRMED':
                 return 'bg-green-100 text-green-800 border-green-200';
+            case 'PAID':
+                return 'bg-blue-100 text-blue-800 border-blue-200';
             case 'PENDING':
                 return 'bg-yellow-100 text-yellow-800 border-yellow-200';
             case 'CANCELLED':
                 return 'bg-red-100 text-red-800 border-red-200';
             case 'COMPLETED':
-                return 'bg-blue-100 text-blue-800 border-blue-200';
+                return 'bg-purple-100 text-purple-800 border-purple-200';
             default:
                 return 'bg-gray-100 text-gray-800 border-gray-200';
         }
@@ -151,23 +162,23 @@ export default function AdminBookingControls({ initialBookings }: AdminBookingCo
                                             <div className="flex-shrink-0 h-10 w-10">
                                                 <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
                                                     <span className="text-sm font-medium text-gray-700">
-                                                        {(booking.user.name || booking.user.email || 'U').charAt(0).toUpperCase()}
+                                                        {(booking.user?.name || booking.user?.email || 'U').charAt(0).toUpperCase()}
                                                     </span>
                                                 </div>
                                             </div>
                                             <div className="ml-4">
                                                 <div className="text-sm font-medium text-gray-900">
-                                                    {booking.user.name || 'No Name'}
+                                                    {booking.user?.name || 'No Name'}
                                                 </div>
                                                 <div className="text-sm text-gray-500">
-                                                    {booking.user.email}
+                                                    {booking.user?.email}
                                                 </div>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-sm font-medium text-gray-900">
-                                            {booking.carType.name}
+                                            {booking.carType?.name}
                                         </div>
                                         <div className="text-sm text-gray-500">
                                             Car Wash Service
@@ -190,7 +201,7 @@ export default function AdminBookingControls({ initialBookings }: AdminBookingCo
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        {booking.status === 'PENDING' && booking.paymentStatus === 'success' ? (
+                                        {booking.status === 'PAID' ? (
                                             <button
                                                 onClick={() => handleConfirm(booking.id)}
                                                 disabled={loadingId === booking.id}
@@ -230,3 +241,4 @@ export default function AdminBookingControls({ initialBookings }: AdminBookingCo
         </div>
     );
 }
+

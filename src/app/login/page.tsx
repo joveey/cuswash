@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import toast from "react-hot-toast";
@@ -11,6 +11,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,23 +21,27 @@ export default function LoginPage() {
 
     try {
       const result = await signIn("credentials", {
-        redirect: false, // Penting: jangan redirect otomatis agar bisa handle error
+        redirect: false, // Penting: Kita tangani redirect secara manual
         email,
         password,
       });
 
       if (result?.ok) {
-        toast.success("Login successful!");
-        router.push("/dashboard");
+        toast.success("Login successful! Redirecting...");
+        // Gunakan router.replace() untuk navigasi yang bersih
+        // Ini akan menggantikan halaman login di riwayat browser
+        router.replace(callbackUrl || "/dashboard");
       } else {
+        // Hanya hentikan loading jika terjadi error
+        setLoading(false);
         toast.error(result?.error || "Invalid email or password.");
       }
     } catch (error) {
-        toast.error("An unexpected error occurred during login.");
-    } finally {
-        setLoading(false);
+      setLoading(false);
+      toast.error("An unexpected error occurred during login.");
     }
-
+    // setLoading(false) sengaja tidak ada di `finally`
+    // untuk mencegah re-render sebelum redirect saat login berhasil.
   };
 
   return (
@@ -95,3 +101,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
