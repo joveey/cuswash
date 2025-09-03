@@ -8,14 +8,14 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function PATCH(
   req: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
     const session = await auth();
     if (session?.user?.role !== 'ADMIN') {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
     
-    const { id } = context.params;
+    const { id } = params;
 
     try {
         const bookingToConfirm = await prisma.booking.findUnique({
@@ -39,7 +39,6 @@ export async function PATCH(
                 carType: true,
             },
         });
-
 
         if (!updatedBooking.user.email) {
             console.warn(`Booking ${updatedBooking.id} confirmed, but user has no email address.`);
