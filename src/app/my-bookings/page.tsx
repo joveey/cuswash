@@ -73,7 +73,7 @@ export default function MyBookingsPage() {
             y: 0,
             opacity: 1,
             transition: {
-                type: 'spring',
+                // Hapus `type: 'spring'` dari sini
                 stiffness: 100
             }
         }
