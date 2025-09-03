@@ -1,12 +1,24 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
 import Navbar from "@/components/Navbar";
 import { Toaster } from 'react-hot-toast';
-import WhatsAppButton from "@/components/WhatsAppButton"; // Import the new component
+import WhatsAppButton from "@/components/WhatsAppButton";
 
-const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
+// Konfigurasi font
+const inter = Inter({ 
+  subsets: ["latin"], 
+  variable: '--font-inter',
+  display: 'swap'
+});
+
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['500', '600', '700', '800'],
+  variable: '--font-poppins',
+  display: 'swap'
+});
 
 export const metadata: Metadata = {
   title: "CusWash - Premium Car Wash Booking",
@@ -19,16 +31,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth">
-      <body className={`${inter.variable} font-sans bg-gray-50`}>
+    <html lang="en" className={`${inter.variable} ${poppins.variable} scroll-smooth`}>
+      <body className={`font-sans`}>
         <Providers>
           <Toaster
             position="top-center"
             toastOptions={{
               duration: 3000,
               style: {
-                background: '#1F2937',
-                color: '#F9FAFB',
+                background: '#343A40', // text-dark
+                color: '#F8F9FA', // background-light
                 borderRadius: '9999px',
               },
             }}
@@ -37,7 +49,7 @@ export default function RootLayout({
           <main className="min-h-screen">
             {children}
           </main>
-          <WhatsAppButton /> {/* Add the button here */}
+          <WhatsAppButton />
         </Providers>
       </body>
     </html>
