@@ -12,7 +12,7 @@ const bookingSchema = z.object({
 });
 
 const snap = new midtransClient.Snap({
-    isProduction: process.env.NODE_ENV === "production",
+    isProduction: false, // TETAP false untuk sandbox
     serverKey: process.env.MIDTRANS_SERVER_KEY,
     clientKey: process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY
 });
@@ -22,6 +22,15 @@ export async function POST(req: Request) {
     if (!session?.user?.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // DEBUG: Tambahkan logging ini SEMENTARA
+    console.log("=== DEBUGGING MIDTRANS CONFIG ===");
+    console.log("Environment:", process.env.NODE_ENV);
+    console.log("Has Server Key:", !!process.env.MIDTRANS_SERVER_KEY);
+    console.log("Has Client Key:", !!process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY);
+    console.log("Server Key prefix:", process.env.MIDTRANS_SERVER_KEY?.substring(0, 15));
+    console.log("Client Key prefix:", process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY?.substring(0, 15));
+    console.log("=== END DEBUG ===");
 
     const body = await req.json();
     const validation = bookingSchema.safeParse(body);
@@ -93,6 +102,7 @@ export async function POST(req: Request) {
             },
         };
 
+        console.log("Creating Midtrans transaction with parameter:", parameter);
         const transaction = await snap.createTransaction(parameter);
         
         // Simpan token Midtrans ke booking yang baru dibuat
@@ -110,4 +120,3 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
-

@@ -9,6 +9,15 @@ export async function GET() {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // DEBUG: Tambahkan logging ini SEMENTARA
+    console.log("=== DEBUGGING MIDTRANS CONFIG (MY-BOOKINGS) ===");
+    console.log("Environment:", process.env.NODE_ENV);
+    console.log("Has Server Key:", !!process.env.MIDTRANS_SERVER_KEY);
+    console.log("Has Client Key:", !!process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY);
+    console.log("Server Key prefix:", process.env.MIDTRANS_SERVER_KEY?.substring(0, 15));
+    console.log("Client Key prefix:", process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY?.substring(0, 15));
+    console.log("=== END DEBUG ===");
+
     try {
         const bookings = await prisma.booking.findMany({
             where: {
