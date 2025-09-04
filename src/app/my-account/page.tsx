@@ -1,4 +1,4 @@
-// src/app/(user)/my-account/page.tsx
+// src/app/my-account/page.tsx
 "use client";
 
 import { useSession } from "next-auth/react";
@@ -6,7 +6,7 @@ import { useState, useEffect, FormEvent } from "react";
 import toast from "react-hot-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Loader2, User, Phone, Mail, Lock } from "lucide-react";
-import { InputWithIcon } from "@/components/ui/InputWithIcon"; // Import komponen baru
+import { InputWithIcon } from "@/components/ui/InputWithIcon";
 
 export default function MyAccountPage() {
     const { data: session, status, update } = useSession();
@@ -20,8 +20,7 @@ export default function MyAccountPage() {
     useEffect(() => {
         if (session?.user) {
             setName(session.user.name || "");
-            // @ts-expect-error
-            setPhoneNumber(session.user.phoneNumber || "");
+            setPhoneNumber((session.user as { phoneNumber?: string }).phoneNumber || "");
         }
     }, [session]);
 

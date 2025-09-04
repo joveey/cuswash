@@ -5,7 +5,6 @@ import toast from 'react-hot-toast';
 import { BookingStatus } from '@prisma/client';
 import { formatRupiah } from '@/lib/utils';
 import { BookingForAdmin } from './page';
-import { motion } from 'framer-motion';
 // FIX: Tambahkan Phone ke dalam import
 import { Check, X, Hourglass, Car, Calendar, Clock, DollarSign, CheckCircle, Phone } from 'lucide-react';
 

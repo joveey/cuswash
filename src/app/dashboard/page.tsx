@@ -4,19 +4,12 @@ import { auth } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Prisma } from '@prisma/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { formatRupiah } from '@/lib/utils';
+import { Card, CardContent } from '@/components/ui/Card';
 import { Calendar, Car, Clock, Star, ArrowRight, PlusCircle, CheckCircle } from 'lucide-react';
 
-// Tipe data yang dibutuhkan untuk halaman ini
-type BookingWithRelations = Prisma.BookingGetPayload<{
-    include: { carType: true, timeSlot: true }
-}>;
-
-// Komponen Badge Status (bisa dipindahkan ke file sendiri jika perlu)
+// Komponen Badge Status
 const BookingStatusBadge = ({ status }: { status: string }) => {
-    const statusInfo: { [key: string]: { text: string; className: string } } = {
+    const statusInfo: Record<string, { text: string; className: string }> = {
         PENDING: { text: 'Menunggu Pembayaran', className: 'bg-yellow-100 text-yellow-800 border border-yellow-200' },
         PAID: { text: 'Terbayar', className: 'bg-blue-100 text-blue-800 border border-blue-200' },
         CONFIRMED: { text: 'Terkonfirmasi', className: 'bg-green-100 text-green-800 border border-green-200' },

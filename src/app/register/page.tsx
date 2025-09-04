@@ -37,7 +37,7 @@ export default function RegisterPage() {
         const data = await res.json();
         toast.error(data.error || "Registration failed.");
       }
-    } catch (error) {
+    } catch {
       toast.error("An unexpected error occurred.");
     } finally {
       setLoading(false);

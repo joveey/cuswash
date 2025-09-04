@@ -8,7 +8,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
     const session = await auth();
     if (session?.user?.role !== 'ADMIN') {
@@ -16,8 +16,10 @@ export async function PATCH(
     }
 
     try {
+        const { id } = await params;
+        
         const bookingToConfirm = await prisma.booking.findUnique({
-            where: { id: params.id },
+            where: { id },
         });
 
         if (!bookingToConfirm) {
@@ -30,7 +32,7 @@ export async function PATCH(
         }
 
         const updatedBooking = await prisma.booking.update({
-            where: { id: params.id },
+            where: { id },
             data: { status: 'CONFIRMED' },
             include: {
                 user: true,
@@ -65,4 +67,3 @@ export async function PATCH(
         }, { status: 500 });
     }
 }
-

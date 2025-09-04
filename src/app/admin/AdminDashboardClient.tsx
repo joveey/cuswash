@@ -39,7 +39,7 @@ export default function AdminDashboardClient({ initialBookings, revenueData }: A
             <div className="container mx-auto px-4 py-8">
                 <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                     <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-                    <p className="text-gray-600 mt-1">Welcome back! Here's what's happening today.</p>
+                    <p className="text-gray-600 mt-1">Welcome back! Here&apos;s what&apos;s happening today.</p>
                 </motion.div>
 
                 <motion.div 

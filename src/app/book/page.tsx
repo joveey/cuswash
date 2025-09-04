@@ -7,16 +7,18 @@ import DatePicker from "react-datepicker";
 import toast from "react-hot-toast";
 import { CarType, TimeSlot } from "@prisma/client";
 import { formatRupiah } from "@/lib/utils";
-import { Info } from "lucide-react"; // ADD: Import Info icon
-import Link from "next/link"; // ADD: Import Link
+import { Info } from "lucide-react";
+import Link from "next/link";
 
 type AvailableTimeSlot = TimeSlot & { isAvailable: boolean };
 
 // Deklarasikan window.snap agar TypeScript tidak error
 declare global {
-    snap: {
-        pay: (token: string, options: Record<string, unknown>) => void;
-    };
+    interface Window {
+        snap: {
+            pay: (token: string, options: Record<string, () => void>) => void;
+        };
+    }
 }
 
 function BookingForm() {
@@ -34,9 +36,8 @@ function BookingForm() {
   const [loading, setLoading] = useState(false);
   const [slotsLoading, setSlotsLoading] = useState(true);
 
-  // ADD: Check if the user has a phone number from the session
-  // @ts-expect-error
-const userHasPhoneNumber = !!session?.user?.phoneNumber;
+  // Check if the user has a phone number from the session
+  const userHasPhoneNumber = !!(session?.user as { phoneNumber?: string })?.phoneNumber;
 
   // Load script Midtrans Snap saat komponen dimuat
   useEffect(() => {
@@ -62,7 +63,7 @@ const userHasPhoneNumber = !!session?.user?.phoneNumber;
         } else if (data.length > 0) {
           setSelectedCarTypeId(data[0].id);
         }
-      } catch (error) {
+      } catch {
         toast.error("Failed to load car types.");
       }
     };
@@ -79,7 +80,7 @@ const userHasPhoneNumber = !!session?.user?.phoneNumber;
         const res = await fetch(`/api/availability?date=${dateString}`);
         const data = await res.json();
         setTimeSlots(data);
-      } catch (error) {
+      } catch {
         toast.error("Failed to load time slots.");
       } finally {
         setSlotsLoading(false);
@@ -99,7 +100,7 @@ const userHasPhoneNumber = !!session?.user?.phoneNumber;
       toast.error("Please select a service, date, and time slot.");
       return;
     }
-    // ADD: Final check for phone number before submitting
+    // Final check for phone number before submitting
     if (!userHasPhoneNumber) {
         toast.error("Please add your phone number in your profile to book.");
         return;
@@ -129,15 +130,15 @@ const userHasPhoneNumber = !!session?.user?.phoneNumber;
 
       if (data.token) {
         window.snap.pay(data.token, {
-            onSuccess: function (result: Record<string, any>) {
+            onSuccess: function () {
                 toast.success("Payment successful!");
                 router.push("/my-bookings");
             },
-            onPending: function (result: Record<string, any>) {
+            onPending: function () {
                 toast("Waiting for your payment.");
                 router.push("/my-bookings");
             },
-            onError: function (result: Record<string, any>) {
+            onError: function () {
                 toast.error("Payment failed.");
             },
             onClose: function () {
@@ -146,13 +147,11 @@ const userHasPhoneNumber = !!session?.user?.phoneNumber;
         });
       }
 
-  } catch (error) { // 1. Hapus (error: any)
+  } catch (error) {
         toast.dismiss(toastId);
-        // 2. Tambahkan pengecekan apakah error adalah instance dari Error
         if (error instanceof Error) {
           toast.error(error.message);
         } else {
-          // Fallback jika yang di-throw bukan objek Error
           toast.error("An unexpected error occurred.");
         }
       } finally {
@@ -171,7 +170,7 @@ const userHasPhoneNumber = !!session?.user?.phoneNumber;
       <div className="w-full max-w-4xl p-8 my-8 space-y-6 bg-white rounded-lg shadow-xl">
         <h1 className="text-3xl font-bold text-center text-gray-800">Book Your Car Wash</h1>
         
-        {/* ADD: Warning message if phone number is missing */}
+        {/* Warning message if phone number is missing */}
         {!userHasPhoneNumber && sessionStatus === 'authenticated' && (
             <div className="p-4 text-sm text-yellow-800 rounded-lg bg-yellow-50 border border-yellow-200 flex items-start">
                 <Info className="h-5 w-5 mr-3 mt-0.5 flex-shrink-0" />
@@ -266,7 +265,6 @@ const userHasPhoneNumber = !!session?.user?.phoneNumber;
 
             <button
               type="submit"
-              // MODIFY: Disable button if phone number is missing
               disabled={loading || !selectedTimeSlotId || !userHasPhoneNumber}
               className="w-full px-4 py-3 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >

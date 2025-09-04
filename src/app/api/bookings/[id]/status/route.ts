@@ -1,5 +1,3 @@
-// src/app/api/bookings/[id]/status/route.ts
-
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import prisma from '@/lib/prisma';
@@ -7,7 +5,7 @@ import { BookingStatus } from '@prisma/client';
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
     const session = await auth();
     // 1. Pastikan hanya admin yang bisa mengakses
@@ -16,6 +14,8 @@ export async function PATCH(
     }
 
     try {
+        const { id } = await params;
+        
         const { status } = await req.json();
 
         // 2. Validasi input status
@@ -24,7 +24,7 @@ export async function PATCH(
         }
         
         const booking = await prisma.booking.findUnique({
-            where: { id: params.id },
+            where: { id },
         });
 
         if (!booking) {
@@ -33,7 +33,7 @@ export async function PATCH(
 
         // 3. Update status booking di database
         const updatedBooking = await prisma.booking.update({
-            where: { id: params.id },
+            where: { id },
             data: { status: status as BookingStatus },
         });
 
